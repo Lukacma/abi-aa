@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -euo pipefail
 
 if [ $# -ne 1 ]; then
     echo "usage: `basename $0` <output-dir>"
@@ -23,10 +24,26 @@ if [ $# -ne 1 ]; then
 fi
 
 CURR_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-ABI_ROOT=${CURR_DIR}/../..
+ABI_ROOT="${CURR_DIR}/../.."
 OUTPUT_DIR=$1
 
-mkdir -p ${OUTPUT_DIR}
+# Use matplotlib's bundled font dir as we can't trust the standard host paths
+# to contain the font we want.
+FONT_DIR="$(python3 -c 'from pathlib import Path; import matplotlib; print(Path(matplotlib.get_data_path()) / "fonts" / "ttf")')"
+
+if [ ! -d "${FONT_DIR}" ]; then
+    echo "error: PDF font directory does not exist: ${FONT_DIR}"
+    exit 1
+fi
+
+for font in DejaVuSans.ttf DejaVuSans-Bold.ttf DejaVuSans-Oblique.ttf DejaVuSans-BoldOblique.ttf; do
+    if [ ! -r "${FONT_DIR}/${font}" ]; then
+        echo "error: required PDF font is missing: ${FONT_DIR}/${font}"
+        exit 1
+    fi
+done
+
+mkdir -p "${OUTPUT_DIR}"
 declare -a docs=(
     # 32-bit
     "aadwarf32" "aaelf32" "aapcs32" "addenda32" "advnote132" "bpabi32" "bsabi32" "clibabi32" "cppabi32" "dbgovl32" "ehabi32" "rtabi32"
@@ -54,10 +71,19 @@ declare -a docs=(
 )
 
 for doc in "${docs[@]}"; do
-    ( set -x ; rst2pdf ${ABI_ROOT}/${doc}/${doc}.rst    \
-                       -s ${CURR_DIR}/rst2pdf-abi.style \
-                       --repeat-table-rows              \
-                       --default-dpi=110                \
-                       -c                               \
-                       -o ${OUTPUT_DIR}/${doc}.pdf )
+    output_file="${OUTPUT_DIR}/${doc}.pdf"
+    rm -f "${output_file}"
+
+    ( set -x; rst2pdf "${ABI_ROOT}/${doc}/${doc}.rst"    \
+                      -s "${CURR_DIR}/rst2pdf-abi.style" \
+                      --font-path "${FONT_DIR}"            \
+                      --repeat-table-rows                 \
+                      --default-dpi=110                   \
+                      -c                                  \
+                      -o "${output_file}" )
+
+    if [ ! -s "${output_file}" ]; then
+        echo "error: rst2pdf did not create ${output_file}" >&2
+        exit 1
+    fi
 done

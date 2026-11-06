@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2020-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -211,9 +211,11 @@ changes to the content of the document for that release.
   |               |                              |   pointers.                                       |
   +---------------+------------------------------+---------------------------------------------------+
   | 2025Q4        | 23\ :sup:`rd` January 2026   | - Drop GD/IE-to-LE relaxation.                    |
-  |               |                              | - Define relocations and code seqeuences for      |
+  |               |                              | - Define relocations and code sequences for       |
   |               |                              |   indirect TLS.                                   |
   |               |                              | - Document program headers and dynamic sections.  |
+  +---------------+------------------------------+---------------------------------------------------+
+  | 2026Q3        | 3\ :sup:`rd` November 2026   | - Simplify relative relocation expressions.       |
   +---------------+------------------------------+---------------------------------------------------+
 
 References
@@ -671,7 +673,7 @@ veneers may be needed for a number of reasons, including, but not limited to:
 - Interworking: The branch source and target symbol are in different execution states(A64/C64).
 - Range Extension: The branch source and target symbol are in C64 execution state and the target
   is outside the addressable span of the branch instruction (+/- 128MB).
-- The target address will not be known until run time, or the target address might be pre-empted.
+- The target address will not be known until run time, or the target address might be preempted.
 
 Long branches with 64-bit range are not supported yet for range extensions or for interworking.
 Interworking between ABIs are not supported yet.

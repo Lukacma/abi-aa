@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2021-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -231,7 +231,16 @@ Change History
  |            |                              | - Update ifunc resolver content to include            |
  |            |                              |   information on AT_HWCAP3,4 fields.                  |
  |            |                              | - Document Function Multi-Versioning.                 |
- |            |                              | - Added chapter on Thread Local Storage (TLS)         |
+ +------------+------------------------------+-------------------------------------------------------+
+ | 2026Q3     | 3\ :sup:`rd` November 2026   | - In `Function Multi-Versioning`_, remove the         |
+ |            |                              |   duplicate ``FEAT_FLAGM2`` entry and correct all     |
+ |            |                              |   subsequent CPU feature bit positions to match       |
+ |            |                              |   the GCC and Clang implementations.                  |
+ |            |                              | - Remove ILP32 from the ABI. ILP32 is a SysV-like     |
+ |            |                              |   data model where int, long int and pointer are      |
+ |            |                              |   32-bit. Refer to previous ABI releases for **Beta** |
+ |            |                              |   ILP32 documentation.                                |
+ |            |                              | - Add a chapter on Thread Local Storage (TLS).        |
  +------------+------------------------------+-------------------------------------------------------+
  | 2026Q3     | 2\ :sup:`nd` October 2026    | - In `Function Multi-Versioning`_, remove the         |
  |            |                              |   duplicate ``FEAT_FLAGM2`` entry and correct all     |
@@ -474,13 +483,13 @@ table (GOT).
 
 A GOT generating relocation is used to inform the static
 linker to create the GOT entry. The address of symbol definitions that
-cannot be pre-empted at dynamic link time can have their address
+cannot be preempted at dynamic link time can have their address
 taken so no GOT generating relocation is required.
 
 PIC can also be used to build position-independent executables. A
 variant of PIC called PIE (position-independent executable) can be
 used to build an executable. PIE assumes that global symbols cannot be
-pre-empted, which means that an indirection via the GOT is not needed.
+preempted, which means that an indirection via the GOT is not needed.
 
 Assembler language addressing mode conventions for instructions
 ---------------------------------------------------------------
@@ -618,6 +627,8 @@ syntax is of the form ``#:<operator>:<symbol name>``
   +-----------------------+-------------+---------------------------------------+
   | ``tlsldm_lo12_nc``    | ``add``     | R_AARCH64_TLSLD_ADD_LO12_NC           |
   +-----------------------+-------------+---------------------------------------+
+  | ``dtprel_hi12``       | ``add``     | R_AARCH64_TLSLD_ADD_DTPREL_HI21       |
+  +-----------------------+-------------+---------------------------------------+
   | ``dtprel_lo12``       | ``add``     | R_AARCH64_TLSLD_ADD_DTPREL_LO12       |
   +-----------------------+-------------+---------------------------------------+
   | ``dtprel_lo12``       | ``ldr``     | R_AARCH64_TLSLD_LDST64_DTPREL_LO12    |
@@ -711,7 +722,7 @@ performance and reduce static code size. The relevant constraints are:
 * The LDR and STR instructions accept a 12-bit unsigned immediate
   offset, scaled by the access size.
 
-* The B and BL instructiond have a range of +/-128MiB. This is
+* The B and BL instructions have a range of +/-128MiB. This is
   typically used for function / procedure calls.
 
 * A series of MOVZ and up to 3 MOVK instructions can be used to
@@ -730,10 +741,10 @@ file layout similar to the diagram below.
 
 .. _Illustrative ELF file layout:
 
-.. rubric:: Illustrative ELF file layout
-
 .. figure:: sysvabi64-elf-layout.svg
-   :scale: 35%
+   :width: 50%
+
+   Illustrative ELF file layout
 
 The table below identifies the code models that have been defined,
 along with the assumptions that the code model may make.
@@ -890,7 +901,7 @@ Get the address of a symbol defined in the same ELF file
 Code that is not position-independent may use the absolute address of
 the symbol. Code that is position-independent may use a pc-relative
 offset to the symbol if the definition of the symbol is not
-pre-emptible. If the symbol is pre-emptible the address must be loaded
+preemptible. If the symbol is preemptible the address must be loaded
 from the GOT.
 
 PC-relative offset of +/- 1 MiB. Suitable for tiny code model.
@@ -987,7 +998,7 @@ Get the address of a weak reference
 An undefined weak reference resolves to 0. In the general case it is
 not possible to give an offset that when added to the PC will result
 in 0. To get the address of a weak reference the compiler can use a
-load from literal or acccess the address via a GOT entry, which will
+load from literal or access the address via a GOT entry, which will
 evaluate to 0 if the symbol is undefined.
 
 .. raw:: pdf
@@ -1181,9 +1192,9 @@ In a position-independent executable all non-local function addresses
 are accessed via the GOT so no indirection via the PLT entry is
 necessary.
 
-Shared objects may implement direct function calls to non-pre-emptable
+Shared objects may implement direct function calls to non-preemptible
 symbols using a direct branch instruction. A static linker will
-consider a symbol not pre-emptable if:
+consider a symbol not preemptible if:
 
  * The symbol has ``STB_LOCAL`` binding.
 
@@ -1193,12 +1204,12 @@ consider a symbol not pre-emptable if:
    SYM-VER_.
 
  * The static linker adds the dynamic tag ``DT_FLAGS`` with the
-   ``DF_SYMBOLIC`` flag set. This makes all symbols non-pre-emptable.
+   ``DF_SYMBOLIC`` flag set. This makes all symbols non-preemptible.
 
  * Some other implementation defined linker feature such as
    ``--dynamic-list`` is used.
 
-Shared objects must indirect all function calls to pre-emptable
+Shared objects must indirect all function calls to preemptible
 symbols through the static linker created Procedure Linkage Table.
 
 Procedure Linkage Table
@@ -1567,11 +1578,11 @@ dynamic loader. Other dynamic linkers may have fewer requirements.
 IFUNC requirements for static linkers
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Relocations to pre-emptable symbols of type ``STT_GNU_IFUNC`` are
+Relocations to preemptible symbols of type ``STT_GNU_IFUNC`` are
 handled in the same way as symbols of type ``STT_FUNC``. The symbol
 type ``STT_GNU_IFUNC`` is propagated into the dynamic symbol table.
 
-Relocations to non-pre-empatable symbols of type ``STT_GNU_IFUNC`` are
+Relocations to non-preemptible symbols of type ``STT_GNU_IFUNC`` are
 resolved to a PLT entry that loads the value of:
 
  * A ``.got.plt`` entry for a non-branch relocation such as
@@ -1593,7 +1604,7 @@ does not require a symbol and may be given a symbol index of 0. For
 relocation contains the address of the IFUNC resolver function.
 
 To make address equivalence of functions with IFUNC resolvers work, if
-the address of a non-preemptable ``STT_GNU_IFUNC`` symbol is taken in
+the address of a non-preemptible ``STT_GNU_IFUNC`` symbol is taken in
 a non-position-independent executable. The static linker must use the
 address of the corresponding PLT entry for the address of the
 function. If the symbol is exported to the dynamic symbol table the
@@ -2208,8 +2219,8 @@ applied to both static and dynamic TLS.
 TLS models
 ----------
 
-There are four defined models of accessing TLS
-of accessing TLS that trade off generality for performance. In descending order of generality:
+There are four defined models of accessing TLS that trade off
+generality for performance. In descending order of generality:
 
    1. General Dynamic, also known as Global Dynamic, can be used anywhere.
 
@@ -2220,7 +2231,7 @@ of accessing TLS that trade off generality for performance. In descending order 
       static TLS block.
 
    4. Local Exec, can be used in the executable for TLS variables
-      defined in the executables static TLS block.
+      defined in the executable's static TLS block.
 
 AArch64 TLS SystemV design choices
 ----------------------------------
@@ -2259,7 +2270,7 @@ PT_TLS.p_align)`` where ``≡`` means congruent to.
 The static and dynamic linker must agree on the size of the padding
 (``PADsize``) between the TCB and the executable's TLS Block. Using
 ``TCBsize`` as the size of the TCB (16 bytes), the following
-expression can be used to calcluate ``PADsize`` from the ``PT_TLS``
+expression can be used to calculate ``PADsize`` from the ``PT_TLS``
 program header.
 
 .. code-block:: c
@@ -2268,7 +2279,7 @@ program header.
 
 A number of dynamic linkers use a different calculation that requires
 ``PT_TLS.p_vaddr ≡ 0 (modulo PT_TLS.p_align)`` to correctly align the
-executables TLS block. In this case the expression above simplifies to
+executable's TLS block. In this case the expression above simplifies to
 ``PADsize = Max(0, PT_TLS.p_align - TCBsize``). For maximum
 compatibility, static linkers and any linker scripts including TLS,
 are recommended to align the TLS block so that ``PT_TLS.p_vaddr ≡ 0
@@ -2378,7 +2389,7 @@ Small Code Model;
 
     adrp  x0, :tlsdesc:var             // R_AARCH64_TLSDESC_ADR_PAGE21 var
     ldr   x1, [x0, #:tlsdesc_lo12:var] // R_AARCH64_TLSDESC_LD64_LO12 var
-    add   x0, x0, #:tlsdesc_lo12:var]  // R_AARCH64_TLSDESC_ADD_LO12 var
+    add   x0, x0, #:tlsdesc_lo12:var   // R_AARCH64_TLSDESC_ADD_LO12 var
     .tlsdesccall var
     blr   x1                           // R_AARCH64_TLSDESC_CALL var
     // offset of var from tp in x0
@@ -2422,11 +2433,39 @@ general dynamic when more than one TLS variable from the same module
 is accessed from the same function, but less efficient when accessing
 a single TLS variable.
 
-The code sequence for local dynamic is the same as global dynamic and
-like global dynamic must be emitted exactly as specified. There are no
+The code sequence to obtain the offset of the module's TLS block from
+the thread pointer is the same as the code sequence for finding the
+offset of a variable from the thread pointer with global dynamic. Like
+global dynamic must be emitted exactly as specified. There are no
 specific relocations for Local Dynamic using the descriptor dialect. A
-special symbol ``_TLS_MODULE_BASE_`` is used to get a tlsdesccall to
-return the offset of the module's TLS block from the thread pointer.
+special symbol ``_TLS_MODULE_BASE_`` is used as the relocation target.
+The static linker must define ``_TLS_MODULE_BASE_`` to the address of
+the TLS block for the module if it is referenced.
+
+.. code-block:: asm
+
+    adrp  x0, :tlsdesc:_TLS_MODULE_BASE_
+    ldr   x1, [x0, #:tlsdesc_lo12:_TLS_MODULE_BASE_]
+    add   x0, x0, #:tlsdesc_lo12:_TLS_MODULE_BASE_
+    .tlsdesccall _TLS_MODULE_BASE_
+    blr   x1
+    // offset of _TLS_MODULE_BASE_ from tp in x0
+
+To calculation to find the address of a local dynamic tls variable
+called ``var`` is:
+
+``TP`` + (offset of ``_TLS_MODULE_BASE_`` from ``TP``) + (offset of
+``var`` from ``_TLS_MODULE_BASE_``).
+
+The calculation of the offset of ``var`` from ``_TLS_MODULE_BASE_`` is
+not defined by the ABI. The code-sequence below shows one possibility:
+
+.. code-block:: asm
+
+   // offset of _TLS_MODULE_BASE_from tp in x0
+   add x0, x0, :dtprel_hi12:var // R_AARCH64_TLSLD_ADD_DTPREL_HI12
+   add x0, x0, :dtprel_lo12_nc:var // R_AARCH64_TLSLD_ADD_DTPREL_LO12_NC
+   // offset of var from tp in x0
 
 Code-generators are not required to implement local dynamic and can
 emit general dynamic in its place.
@@ -2495,7 +2534,7 @@ executables TLS block is smaller than 16 KiB.
     add  xn, xn, :tprel_lo12_nc:var       // R_AARCH64_TLSLE_ADD_TPREL_LO12_NC var
     // offset of var from tp in xn
 
-Optimization to load a 64-bit var directly into a core register.
+Optimization to load a var directly into a core register.
 
 .. code-block:: asm
 

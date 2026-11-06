@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2003, 2005, 2007, 2008 2018, 2020-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -709,7 +709,7 @@ describes the following:
 
   * Symbol versioning information.
 
-  * Symbol pre-emption information.
+  * Symbol preemption information.
 
   * Procedure linkage table (PLT) entries, also known to users of the Arm
     architecture as intra-call veneers.

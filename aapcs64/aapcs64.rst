@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2011, 2013, 2018, 2020-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -270,12 +270,10 @@ changes to the content of the document for that release.
 |            |                    | - Explicitly say that the FFR is a caller-saved register.        |
 |            |                    | - Clarify how __bf16 affects HFAs                                |
 +------------+--------------------+------------------------------------------------------------------+
-| 2025Q4     | 3\ :sup:`rd`       | - Standardize on "caller-saved" and "callee-saved".              |
-|            | March 2026         |                                                                  |
-+------------+--------------------+------------------------------------------------------------------+
-| 2026Q3     | 13\ :sup:`th`      | - Remove ILP32 from the ABI. ILP32 is a SysV-like data model     |
-|            | August 2026        |   where int, long int and pointer are 32-bit. Refer to previous  |
+| 2026Q3     | 3\ :sup:`rd`       | - Remove ILP32 from the ABI. ILP32 is a SysV-like data model     |
+|            | November 2026      |   where int, long int and pointer are 32-bit. Refer to previous  |
 |            |                    |   ABI releases for **Beta** ILP32 documentation.                 |
+|            |                    | - Standardize on "caller-saved" and "callee-saved".              |
 +------------+--------------------+------------------------------------------------------------------+
 
 References
@@ -695,12 +693,12 @@ The least significant bit in an object is always designated as bit 0.
 The mapping of a word-sized data object to memory is shown in the following figures. All objects are pure-endian, so the mappings may be scaled accordingly for larger or smaller objects [#aapcs64-f5]_.
 
 .. figure:: aapcs64-bigendian.svg
-    :scale: 50%
+    :width: 50%
 
     Memory layout of big-endian data object
 
 .. figure:: aapcs64-littleendian.svg
-    :scale: 50%
+    :width: 50%
 
     Memory layout of little-endian data object
 
@@ -3475,12 +3473,14 @@ set to zero, permitting a simplified implementation of ``va_arg`` which simply a
 Although this standard does not mandate a particular stack frame organisation beyond what is required to meet the stack constraints described in `The Stack`_, the following figure illustrates one possible stack layout for a variadic routine which invokes the ``va_start`` macro.
 
 .. figure:: aapcs64-variadic-stack.svg
+    :width: 100%
 
     Example stack frame layout
 
 Focussing on just the top of callee’s stack frame, the following figure illustrates graphically how the ``__va_list`` structure might be initialised by ``va_start`` to identify the three potential locations of the next anonymous argument.
 
 .. figure:: aapcs64-va-list.svg
+    :width: 100%
 
     The va\_list
 

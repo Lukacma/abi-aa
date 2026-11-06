@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2020-2026
 
 .. _ARMARM: https://developer.arm.com/documentation/ddi0487/latest
@@ -250,9 +250,9 @@ changes to the content of the document for that release.
   |            |                             | - Move AUTH GOT generating relocations out of private experiment |
   |            |                             |   Range.                                                         |
   +------------+-----------------------------+------------------------------------------------------------------+
-  | 2026Q2     | 6\ :sup:`th` January 2026   | - Clarify combination of MemtagABI and PAuthABI relocations      |
-  +------------+-----------------------------+------------------------------------------------------------------+
-  | 2026Q2     | 14\ :sup:`th` May 2026      | - Add R_AARCH64_AUTH_TLSDESC_CALL relocation                     |
+  | 2026Q3     | 3\ :sup:`rd` November 2026  | - Simplify relative relocation expressions.                      |
+  |            |                             | - Clarify combination of MemtagABI and PAuthABI relocations.     |
+  |            |                             | - Define R_AARCH64_AUTH_TLSDESC_CALL relocation.                 |
   +------------+-----------------------------+------------------------------------------------------------------+
 
 References
@@ -474,14 +474,14 @@ General Restrictions
   way to avoid COPY relocations is to access imported signed pointers
   via the GOT.
 
-- PAUTHELF64 only supports the descriptor based TLS (TLSDESC) dialect.
+- PAUTHELF64 only supports the "descriptor" based TLS (TLSDESC) dialect.
   The "traditional" dialect as selected by -mtls-dialect=traditional is
   not supported.
 
 The Rationale behind the requirement to avoid copy relocations is that
 the static linker creates the storage that the copy is placed; which
 adds more complication in the form of communicating a signing schema
-than avoiding the copy relocation. The descriptor based TLS has been
+than avoiding the copy relocation. The "descriptor" based TLS has been
 chosen as the most common implementation choice for AArch64.
 
 .. raw:: pdf

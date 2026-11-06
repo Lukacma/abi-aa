@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2011, 2013, 2018-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -226,7 +226,7 @@ changes to the content of the document for that release.
   +---------------+--------------------+-----------------------------------------+
   | 2019Q4        | 30th January 2020  | Minor layout changes.                   |
   +---------------+--------------------+-----------------------------------------+
-  | 2020Q2        | 1st July 2020      | Specifiy ``R_AARCH64_PLT32``. Correct   |
+  | 2020Q2        | 1st July 2020      | Specify ``R_AARCH64_PLT32``. Correct    |
   |               |                    | minus sign not rendering in section     |
   |               |                    | `Group relocations`_. Adjust            |
   |               |                    | table widths for readability.           |
@@ -281,8 +281,6 @@ changes to the content of the document for that release.
   | 2025Q1        | 7\ :sup:`th`       | - In `Section Attribute Flags`_, added  |
   |               | April 2025         |   `SHF_AARCH64_PURECODE` processor      |
   |               |                    |   specific section attribute flag.      |
-  |               |                    | - Clarify use of addends in GOT         |
-  |               |                    |   generating static TLS relocations.    |
   +---------------+--------------------+-----------------------------------------+
   | 2025Q4        | 23\ :sup:`rd`      | - In `Call and Jump relocations`_ added |
   |               | January 2026       |   static linker requirements on veneers |
@@ -293,16 +291,23 @@ changes to the content of the document for that release.
   |               |                    | - R_AARCH64_TLS_DTPREL can be used as a |
   |               |                    |   static relocation as well as dynamic  |
   +---------------+--------------------+-----------------------------------------+
-  | 2026Q2        | 29\ :sup:`th`      | - In `Call and Jump relocations`_ make  |
-  |               |                    |   pc-relative relocaions signed.        |
-  +---------------+--------------------+-----------------------------------------+
-  | 2026Q3        | 13\ :sup:`th`      | - Add new section types defined in ELF  |
-  |               | August 2026        |   extension documents                   |
+  | 2026Q3        | 3\ :sup:`rd`       | - In `Call and Jump relocations`_ make  |
+  |               | November 2026      |   pc-relative relocations signed.       |
+  |               |                    | - Add new section types defined in ELF  |
+  |               |                    |   extension documents.                  |
   |               |                    | - Remove ILP32 from the ABI. ILP32 is a |
   |               |                    |   SysV-like data model where int, long  |
   |               |                    |   int and pointer are 32-bit. Refer to  |
   |               |                    |   previous ABI releases for **Beta**    |
   |               |                    |   ILP32 documentation.                  |
+  |               |                    | - Improve relocation optimizations.     |
+  |               |                    | - Simplify relative relocation          |
+  |               |                    |   expressions.                          |
+  |               |                    | - Clarify that PLT32 overflow checking  |
+  |               |                    |   is always signed.                     |
+  |               |                    | - Define R_AARCH64_AUTH_TLSDESC_CALL.   |
+  |               |                    | - Clarify use of addends in GOT         |
+  |               |                    |   generating static TLS relocations.    |
   +---------------+--------------------+-----------------------------------------+
 
 References
@@ -481,7 +486,7 @@ Symbols for which a PLT entry must be generated
 
 A PLT entry implements a long-branch to a destination outside of this executable file. In general, the static linker knows only the name of the destination. It does not know its address. Such a location is called an imported location or imported symbol.
 
-SysV-based Dynamic Shared Objects (DSOs) (e.g. for Linux) also require functions exported from an executable file to have PLT entries. In effect, exported functions are treated as if they were imported, so that their definitions can be overridden (pre-empted) at dynamic link time.
+SysV-based Dynamic Shared Objects (DSOs) (e.g. for Linux) also require functions exported from an executable file to have PLT entries. In effect, exported functions are treated as if they were imported, so that their definitions can be overridden (preempted) at dynamic link time.
 
 A linker must generate a PLT entry for each candidate symbol cited by a relocation directive that relocates an AArch64 B/BL-class instruction (`Call and Jump relocations`_). For a Linux/SysV DSO, each ``STB_GLOBAL`` symbol with ``STV_DEFAULT`` visibility is a candidate.
 
@@ -1152,9 +1157,11 @@ X < 0: Set the instruction to ``MOVN`` and its immediate field to NOT (selected 
   +------------+---------------------------------------+-------------------+-----------------------------------------------------------------------------------------------------+
   | 274        | R\_AARCH64\_ADR\_PREL\_LO21           | S + A - P         | Set an ADR immediate value to bits [20:0] of X; check that -2\ :sup:`20` <= X < 2\ :sup:`20`        |
   +------------+---------------------------------------+-------------------+-----------------------------------------------------------------------------------------------------+
-  | 275        | R\_AARCH64\_ADR\_PREL\_PG\_HI21       | Page(S+A)-Page(P) | Set an ADRP immediate value to bits [32:12] of the X; check that -2\ :sup:`32` <= X < 2\ :sup:`32`  |
+  | 275        | R\_AARCH64\_ADR\_PREL\_PG\_HI21       | Page(S+A)         | Set an ADRP immediate value to bits [32:12] of the X; check that -2\ :sup:`32` <= X < 2\ :sup:`32`  |
+  |            |                                       | - Page(P)         |                                                                                                     |
   +------------+---------------------------------------+-------------------+-----------------------------------------------------------------------------------------------------+
-  | 276        | R\_AARCH64\_ADR\_PREL\_PG\_HI21\_NC   | Page(S+A)-Page(P) | Set an ADRP immediate value to bits [32:12] of the X. No overflow check                             |
+  | 276        | R\_AARCH64\_ADR\_PREL\_PG\_HI21\_NC   | Page(S+A)         | Set an ADRP immediate value to bits [32:12] of the X. No overflow check                             |
+  |            |                                       | - Page(P)         |                                                                                                     |
   +------------+---------------------------------------+-------------------+-----------------------------------------------------------------------------------------------------+
   | 277        | R\_AARCH64\_ADD\_ABS\_LO12\_NC        | S + A             | Set an ADD immediate value to bits [11:0] of X. No overflow check. Used with relocations            |
   |            |                                       |                   | ADR\_PREL\_PG\_HI21 and  ADR\_PREL\_PG\_HI21\_NC                                                    |
@@ -1185,13 +1192,13 @@ X < 0: Set the instruction to ``MOVN`` and its immediate field to NOT (selected 
   +------------+----------------------+------------+------------------------------------------------------------------------------------------------------------------------+
   | ELF64 Code | Name                 | Operation  | Comment                                                                                                                |
   +============+======================+============+========================================================================================================================+
-  | 279        | R\_AARCH64\_TSTBR14  | S+A-P      | Set the immediate field of a TBZ/TBNZ instruction to bits [15:2] of X; check -2\ :sup:`15` <= X < 2\ :sup:`15`         |
+  | 279        | R\_AARCH64\_TSTBR14  | S+A - P    | Set the immediate field of a TBZ/TBNZ instruction to bits [15:2] of X; check -2\ :sup:`15` <= X < 2\ :sup:`15`         |
   +------------+----------------------+------------+------------------------------------------------------------------------------------------------------------------------+
-  | 280        | R\_AARCH64\_CONDBR19 | S+A-P      | Set the immediate field of a conditional branch instruction to bits [20:2] of X; check -2\ :sup:`20` <= X< 2\ :sup:`20`|
+  | 280        | R\_AARCH64\_CONDBR19 | S+A - P    | Set the immediate field of a conditional branch instruction to bits [20:2] of X; check -2\ :sup:`20` <= X< 2\ :sup:`20`|
   +------------+----------------------+------------+------------------------------------------------------------------------------------------------------------------------+
-  | 282        | R\_AARCH64\_JUMP26   | S+A-P      | Set a B immediate field to bits [27:2] of X; check that -2\ :sup:`27` <= X < 2\ :sup:`27`                              |
+  | 282        | R\_AARCH64\_JUMP26   | S+A - P    | Set a B immediate field to bits [27:2] of X; check that -2\ :sup:`27` <= X < 2\ :sup:`27`                              |
   +------------+----------------------+------------+------------------------------------------------------------------------------------------------------------------------+
-  | 283        | R\_AARCH64\_CALL26   | S+A-P      | Set a CALL immediate field to bits [27:2] of X; check that -2\ :sup:`27` <= X < 2\ :sup:`27`                           |
+  | 283        | R\_AARCH64\_CALL26   | S+A - P    | Set a CALL immediate field to bits [27:2] of X; check that -2\ :sup:`27` <= X < 2\ :sup:`27`                           |
   +------------+----------------------+------------+------------------------------------------------------------------------------------------------------------------------+
 
 .. _PC-relative inline relocations:
@@ -1203,22 +1210,22 @@ X < 0: Set the instruction to ``MOVN`` and its immediate field to NOT (selected 
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
   | ELF64 Code | Name                           | Operation  | Comment                                                             |
   +============+================================+============+=====================================================================+
-  | 287        | R\_AARCH64\_MOVW\_PREL\_G0     | S+A-P      | Set a MOV[NZ]immediate field to bits [15:0] of X                    |
+  | 287        | R\_AARCH64\_MOVW\_PREL\_G0     | S+A - P    | Set a MOV[NZ]immediate field to bits [15:0] of X                    |
   |            |                                |            | (see `PC-relative MOVW`_)                                           |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 288        | R\_AARCH64\_MOVW\_PREL\_G0\_NC | S+A-P      | Set a MOVK immediate field to bits [15:0] of X. No overflow check   |
+  | 288        | R\_AARCH64\_MOVW\_PREL\_G0\_NC | S+A - P    | Set a MOVK immediate field to bits [15:0] of X. No overflow check   |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 289        | R\_AARCH64\_MOVW\_PREL\_G1     | S+A-P      | Set a MOV[NZ]immediate field to bits [31:16] of X                   |
+  | 289        | R\_AARCH64\_MOVW\_PREL\_G1     | S+A - P    | Set a MOV[NZ]immediate field to bits [31:16] of X                   |
   |            |                                |            | (see `PC-relative MOVW`_)                                           |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 290        | R\_AARCH64\_MOVW\_PREL\_G1\_NC | S+A-P      | Set a MOVK immediate field to bits [31:16] of X. No overflow check  |
+  | 290        | R\_AARCH64\_MOVW\_PREL\_G1\_NC | S+A - P    | Set a MOVK immediate field to bits [31:16] of X. No overflow check  |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 291        | R\_AARCH64\_MOVW\_PREL\_G2     | S+A-P      | Set a MOV[NZ]immediate value to bits [47:32] of X                   |
+  | 291        | R\_AARCH64\_MOVW\_PREL\_G2     | S+A - P    | Set a MOV[NZ]immediate value to bits [47:32] of X                   |
   |            |                                |            | (see `PC-relative MOVW`_)                                           |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 292        | R\_AARCH64\_MOVW\_PREL\_G2\_NC | S+A-P      | Set a MOVK immediate field to bits [47:32] of X. No overflow check  |
+  | 292        | R\_AARCH64\_MOVW\_PREL\_G2\_NC | S+A - P    | Set a MOVK immediate field to bits [47:32] of X. No overflow check  |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
-  | 293        | R\_AARCH64\_MOVW\_PREL\_G3     | S+A-P      | Set a MOV[NZ]immediate value to bits [63:48] of X                   |
+  | 293        | R\_AARCH64\_MOVW\_PREL\_G3     | S+A - P    | Set a MOV[NZ]immediate value to bits [63:48] of X                   |
   |            |                                |            | (see `PC-relative MOVW`_)                                           |
   +------------+--------------------------------+------------+---------------------------------------------------------------------+
 
@@ -1241,22 +1248,22 @@ Non-checking (``_NC``) forms relocate ``MOVK``; checking forms relocate ``MOVN``
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
   | ELF64 Code | Name                             | Operation         | Comment                                                              |
   +============+==================================+===================+======================================================================+
-  | 300        | R\_AARCH64\_MOVW\_GOTOFF\_G0     | G(GDAT(S)) -GOT   | Set a MOV[NZ] immediate field to bits [15:0] of X                    |
+  | 300        | R\_AARCH64\_MOVW\_GOTOFF\_G0     | G(GDAT(S)) - GOT  | Set a MOV[NZ] immediate field to bits [15:0] of X                    |
   |            |                                  |                   | (see `GOT-relative MOVW`_)                                           |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 301        | R\_AARCH64\_MOVW\_GOTOFF\_G0\_NC | G(GDAT(S)) -GOT   | Set a MOVK immediate field to bits [15:0] of X. No overflow check    |
+  | 301        | R\_AARCH64\_MOVW\_GOTOFF\_G0\_NC | G(GDAT(S)) - GOT  | Set a MOVK immediate field to bits [15:0] of X. No overflow check    |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 302        | R\_AARCH64\_MOVW\_GOTOFF\_G1     | G(GDAT(S)) -GOT   | Set a MOV[NZ] immediate value to bits [31:16] of X                   |
+  | 302        | R\_AARCH64\_MOVW\_GOTOFF\_G1     | G(GDAT(S)) - GOT  | Set a MOV[NZ] immediate value to bits [31:16] of X                   |
   |            |                                  |                   | (see `GOT-relative MOVW`_)                                           |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 303        | R\_AARCH64\_MOVW\_GOTOFF\_G1\_NC | G(GDAT(S)) -GOT   | Set a MOVK immediate value to bits [31:16] of X. No overflow check   |
+  | 303        | R\_AARCH64\_MOVW\_GOTOFF\_G1\_NC | G(GDAT(S)) - GOT  | Set a MOVK immediate value to bits [31:16] of X. No overflow check   |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 304        | R\_AARCH64\_MOVW\_GOTOFF\_G2     | G(GDAT(S)) -GOT   | Set a MOV[NZ] immediate value to bits [47:32] of X                   |
+  | 304        | R\_AARCH64\_MOVW\_GOTOFF\_G2     | G(GDAT(S)) - GOT  | Set a MOV[NZ] immediate value to bits [47:32] of X                   |
   |            |                                  |                   | (see `GOT-relative MOVW`_)                                           |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 305        | R\_AARCH64\_MOVW\_GOTOFF\_G2\_NC | G(GDAT(S)) -GOT   | Set a MOVK immediate value to bits [47:32] of X. No overflow check   |
+  | 305        | R\_AARCH64\_MOVW\_GOTOFF\_G2\_NC | G(GDAT(S)) - GOT  | Set a MOVK immediate value to bits [47:32] of X. No overflow check   |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
-  | 306        | R\_AARCH64\_MOVW\_GOTOFF\_G3     | G(GDAT(S)) -GOT   | Set a MOV[NZ] immediate value to bits [63:48] of X                   |
+  | 306        | R\_AARCH64\_MOVW\_GOTOFF\_G3     | G(GDAT(S)) - GOT  | Set a MOV[NZ] immediate value to bits [63:48] of X                   |
   |            |                                  |                   | (see `GOT-relative MOVW`_)                                           |
   +------------+----------------------------------+-------------------+----------------------------------------------------------------------+
 
@@ -1276,12 +1283,12 @@ Non-checking (``_NC``) forms relocate ``MOVK``; checking forms relocate ``MOVN``
   +------------+------------------------+------------------+-------------------------------------------------------------------------------------------------------------------------+
   | ELF64 Code | Name                   | Operation        | Comment                                                                                                                 |
   +============+========================+==================+=========================================================================================================================+
-  | 307        | R\_AARCH64\_GOTREL64   | S+A-GOT          | Write bits [63:0] of X at byte-aligned place P.  This represents a 64-bit offset relative to the GOT.                   |
+  | 307        | R\_AARCH64\_GOTREL64   | S+A - GOT        | Write bits [63:0] of X at byte-aligned place P.  This represents a 64-bit offset relative to the GOT.                   |
   +------------+------------------------+------------------+-------------------------------------------------------------------------------------------------------------------------+
-  | 308        | R\_AARCH64\_GOTREL32   | S+A-GOT          | Write bits [31:0] of X at byte-aligned place P.  This represents a 32-bit offset relative to GOT, treated as signed;    |
+  | 308        | R\_AARCH64\_GOTREL32   | S+A - GOT        | Write bits [31:0] of X at byte-aligned place P.  This represents a 32-bit offset relative to GOT, treated as signed;    |
   |            |                        |                  | Check that -2\ :sup:`31` <= X < 2\ :sup:`31`.                                                                           |
   +------------+------------------------+------------------+-------------------------------------------------------------------------------------------------------------------------+
-  | 315        | R\_AARCH64\_GOTPCREL32 | G(GDAT(S))-P+A   | Write bits [31:0] of X at byte-aligned place P.  This represents a 32-bit offset relative to GOT entry for an address,  |
+  | 315        | R\_AARCH64\_GOTPCREL32 | G(GDAT(S)) - P+A | Write bits [31:0] of X at byte-aligned place P.  This represents a 32-bit offset relative to GOT entry for an address,  |
   |            |                        |                  | treated as signed; Check that -2\ :sup:`31` <= X < 2\ :sup:`31`.                                                        |
   +------------+------------------------+------------------+-------------------------------------------------------------------------------------------------------------------------+
 
@@ -1294,15 +1301,15 @@ Non-checking (``_NC``) forms relocate ``MOVK``; checking forms relocate ``MOVN``
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
   | ELF64 Code  | Name                            | Operation                  | Comment                                                                                              |
   +=============+=================================+============================+======================================================================================================+
-  | 309         | R\_AARCH64\_GOT\_LD\_PREL19     | G(GDAT(S))- P              | Set a load-literal immediate field to bits [20:2] of X; check –2\ :sup:`20` <= X < 2\ :sup:`20`      |
+  | 309         | R\_AARCH64\_GOT\_LD\_PREL19     | G(GDAT(S)) - P             | Set a load-literal immediate field to bits [20:2] of X; check –2\ :sup:`20` <= X < 2\ :sup:`20`      |
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
-  | 310         | R\_AARCH64\_LD64\_GOTOFF\_LO15  | G(GDAT(S))- GOT            | Set a LD/ST immediate field to bits [14:3] of X; check that 0 <= X < 2\ :sup:`15`, X&7 = 0           |
+  | 310         | R\_AARCH64\_LD64\_GOTOFF\_LO15  | G(GDAT(S)) - GOT           | Set a LD/ST immediate field to bits [14:3] of X; check that 0 <= X < 2\ :sup:`15`, X&7 = 0           |
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
-  | 311         | R\_AARCH64\_ADR\_GOT\_PAGE      | Page(G(GDAT(S)))-Page(P)   | Set the immediate value of an ADRP to bits [32:12] of X; check that –2\ :sup:`32` <= X < 2\ :sup:`32`|
+  | 311         | R\_AARCH64\_ADR\_GOT\_PAGE      | Page(G(GDAT(S))) - Page(P) | Set the immediate value of an ADRP to bits [32:12] of X; check that –2\ :sup:`32` <= X < 2\ :sup:`32`|
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
   | 312         | R\_AARCH64\_LD64\_GOT\_LO12\_NC | G(GDAT(S))                 | Set the LD/ST immediate field to bits [11:3] of X. No overflow check; check that X&7 = 0             |
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
-  | 313         | R\_AARCH64\_LD64\_GOTPAGE\_LO15 | G(GDAT(S))-Page(GOT)       | Set the LD/ST immediate field to bits [14:3] of X; check that 0 <= X < 2\ :sup:`15`, X&7 = 0         |
+  | 313         | R\_AARCH64\_LD64\_GOTPAGE\_LO15 | G(GDAT(S)) - Page(GOT)     | Set the LD/ST immediate field to bits [14:3] of X; check that 0 <= X < 2\ :sup:`15`, X&7 = 0         |
   +-------------+---------------------------------+----------------------------+------------------------------------------------------------------------------------------------------+
 
 Call and Jump relocations
@@ -1324,11 +1331,11 @@ In all other cases a linker shall diagnose an error if relocation cannot be effe
 
 - Target is outside the addressable span of the branch instruction (+/- 128MB).
 
-- Target address will not be known until run time, or the target address might be pre-empted.
+- Target address will not be known until run time, or the target address might be preempted.
 
 In some systems indirect calls may also use veneers in order to support dynamic linkage that preserves pointer comparability (all reference to the function resolve to the same address).
 
-On platforms that do not support dynamic pre-emption of symbols, an unresolved weak reference to a symbol relocated by ``R_AARCH64_CALL26`` shall be treated as a jump to the next instruction (the call becomes a no-op). The behaviour of ``R_AARCH64_JUMP26`` and ``R_AARCH64_PLT32`` in these conditions is not specified by this standard.
+On platforms that do not support dynamic preemption of symbols, an unresolved weak reference to a symbol relocated by ``R_AARCH64_CALL26`` shall be treated as a jump to the next instruction (the call becomes a no-op). The behaviour of ``R_AARCH64_JUMP26`` and ``R_AARCH64_PLT32`` in these conditions is not specified by this standard.
 
 In a link-unit that is intended to be used when BTI guarded pages are enabled, veneers created by the static linker that use an indirect branch must target a BTI instruction or a BTI compatible instruction. If the destination of the veneer is in the same link unit and does not have a BTI or BTI compatible instruction, the static linker must generate an additional veneer that has a BTI instruction followed by a transfer of control to the destination that does not use an indirect branch. See `SYSVABI64`_ for additional requirements on code-generators and PLT sequences.
 
@@ -1366,7 +1373,7 @@ Linkers may optionally optimize instructions affected by relocation. Relocation 
 
   - The relocation ``R_AARCH64_ADR_PREL_PG_HI21`` may emit a MOV with zero immediate for undefined weak symbols.
 
-  - The following TLS relocations may be optimized if the symbol is not a pre-emptable definition and the TLS offset fits in 16 bits:
+  - The following TLS relocations may be optimized if the symbol is not a preemptible definition and the TLS offset fits in 16 bits:
 
     ::
 
@@ -1401,7 +1408,7 @@ Linkers may optionally optimize instructions affected by relocation. Relocation 
 
     - The instructions are consecutive, relocate the same symbol and use the
       same source and destination registers.
-    - ``symbol`` is not a pre-emptable definition.
+    - ``symbol`` is not a preemptible definition.
     - ``symbol`` is not of type ``STT_GNU_IFUNC``.
     - ``symbol`` does not have a ``st_shndx`` of ``SHN_ABS``.
 
@@ -1510,7 +1517,7 @@ Non-checking (``_NC``) MOVW forms relocate MOVK; checking forms relocate ``MOVN`
 Local Dynamic thread-local storage model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. class:: aaelf64-dynamic-tls-relocations
+.. class:: aaelf64-local-dynamic-tls-relocations
 
 .. table:: Local Dynamic TLS relocations
 
@@ -1519,7 +1526,8 @@ Local Dynamic thread-local storage model
   +=============+================================================+===========================+================================================================================================+
   | 517         | R\_AARCH64\_TLSLD\_ADR\_PREL21                 | G(GLDM(S)) - P            | Set an ADR immediate field to bits [20:0] of X; check –2\ :sup:`20` <= X < 2\ :sup:`20`        |
   +-------------+------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------+
-  | 518         | R\_AARCH64\_TLSLD\_ADR\_PAGE21                 | Page(G(GLDM(S)))-Page(P)  | Set an ADRP immediate field to bits [32:12] of X; check –2\ :sup:`32` <= X < 2\ :sup:`32`      |
+  | 518         | R\_AARCH64\_TLSLD\_ADR\_PAGE21                 | Page(G(GLDM(S)))          | Set an ADRP immediate field to bits [32:12] of X; check –2\ :sup:`32` <= X < 2\ :sup:`32`      |
+  |             |                                                | - Page(P)                 |                                                                                                |
   +-------------+------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------+
   | 519         | R\_AARCH64\_TLSLD\_ADD\_LO12\_NC               | G(GLDM(S))                | Set an ADD immediate field to bits [11:0] of X. No overflow check                              |
   +-------------+------------------------------------------------+---------------------------+------------------------------------------------------------------------------------------------+
@@ -1597,7 +1605,7 @@ Initial Exec thread-local storage model
   +------------+----------------------------------------------+--------------------------------+------------------------------------------------------------------------------------------+
   | 542        | R\_AARCH64\_TLSIE\_LD64\_GOTTPREL\_LO12\_NC  | G(GTPREL(S))                   | Set an LD offset field to bits [11:3] of X. No overflow check; check that X&7=0          |
   +------------+----------------------------------------------+--------------------------------+------------------------------------------------------------------------------------------+
-  | 543        | R\_AARCH64\_TLSIE\_LD\_GOTTPREL\_PREL19      | G(GTPREL(S)) – P               | Set a load-literal immediate to bits [20:2] of X; check –2\ :sup:`20` <= X < 2\ :sup:`20`|
+  | 543        | R\_AARCH64\_TLSIE\_LD\_GOTTPREL\_PREL19      | G(GTPREL(S)) - P               | Set a load-literal immediate to bits [20:2] of X; check –2\ :sup:`20` <= X < 2\ :sup:`20`|
   +------------+----------------------------------------------+--------------------------------+------------------------------------------------------------------------------------------+
 
 .. _TLSIE MOVW:
@@ -1863,7 +1871,7 @@ Structure Protection Extension is out of scope of the ABI.
 
 The ``R_AARCH64_FUNCINIT64`` referenced symbol must be a function that
 does not have a type of ``STT_GNU_IFUNC``. The referenced symbol must
-be non-pre-emptible and have an address that is known at static link
+be non-preemptible and have an address that is known at static link
 time.
 
 Dynamic relocations
@@ -1925,7 +1933,7 @@ With the exception of ``R_AARCH64_COPY`` all dynamic relocations require that th
 
 **Note: COPY relocation**
 
-``R_AARCH64_COPY`` may only appear in executable ELF files where e\_type is set to ``ET_EXEC``. The effect is to   cause the dynamic linker to locate the target symbol in a shared library object and then to copy the number of  bytes specified by its ``st_size`` field to the place. The address of the place is then used to pre-empt all other references to the specified symbol. It is an error if the storage space allocated in the executable is insufficient to hold the full copy of the symbol. If the object being copied contains dynamic relocations then the effect must be as if those relocations were performed before the copy was made.
+``R_AARCH64_COPY`` may only appear in executable ELF files where e\_type is set to ``ET_EXEC``. The effect is to cause the dynamic linker to locate the target symbol in a shared library object and then to copy the number of bytes specified by its ``st_size`` field to the place. The address of the place is then used to preempt all other references to the specified symbol. It is an error if the storage space allocated in the executable is insufficient to hold the full copy of the symbol. If the object being copied contains dynamic relocations then the effect must be as if those relocations were performed before the copy was made.
 
 ``R_AARCH64_COPY`` is normally only used in SysV type environments where the executable is not position- independent and references by the code and read-only data sections cannot be relocated dynamically to refer to an object that is defined in a shared library.
 
@@ -2030,6 +2038,8 @@ The Program Header provides a number of fields that assist in interpretation of 
 
 p\_type
   The below table lists the processor-specific segment types.
+
+.. class:: aaelf64-segment-types
 
 .. table:: Processor-specific segment types
 

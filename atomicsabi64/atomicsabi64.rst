@@ -3,8 +3,8 @@
    CC-BY-SA-4.0 AND Apache-Patent-License
    See LICENSE file for details
 
-.. |release| replace:: 2025Q4
-.. |date-of-issue| replace:: 23\ :sup:`rd` January 2026
+.. |release| replace:: 2026Q3
+.. |date-of-issue| replace:: 3\ :sup:`rd` November 2026
 .. |copyright-date| replace:: 2024-2026
 .. |footer| replace:: Copyright © |copyright-date|, Arm Limited and its
                       affiliates. All rights reserved.
@@ -227,6 +227,8 @@ changes to the content of the document for that release.
   |         |                              | - Fix some typos in the 32-bit atomics mapping table.             |
   |         |                              | - Document release fence using ISHST+ISHLD barriers.              |
   +---------+------------------------------+-------------------------------------------------------------------+
+  | 2026Q3  | 3\ :sup:`rd` November 2026   | - Add ``store_add`` mappings for non-returning reductions.        |
+  +---------+------------------------------+-------------------------------------------------------------------+
 
 References
 ----------
@@ -318,7 +320,7 @@ Arbitrary registers may be used in the mappings. Instructions marked with ``*``
 in the tables cannot use ``WZR`` or ``XZR`` as a destination register. This is
 further detailed in `Special Cases`_.
 
-Only some variants of ``fetch_<op>`` and ``store_<op>`` are listed since the
+Only some variants of ``fetch_<op>`` and ``store_<op>`` are listed because the
 mappings are identical except for a different ``<op>``. ``store_<op>`` is the
 non-returning form of ``fetch_<op>`` and, like ``store``, only allows the
 ``relaxed``, ``release`` and ``seq_cst`` memory orders.
